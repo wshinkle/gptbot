@@ -13,27 +13,35 @@ class gptClient(discord.Client):
     async def on_message(self, message):
         try:
             messageContent = message.content
-            messageArgs = messageContent.split(maxsplit = 2)
+            messageArgs = messageContent.split(maxsplit = 3)
             if messageArgs[0] == '!gpt':
-                if messageArgs[1] == '--help':
-                    r = ("GPTBot is used to answer questions and generate "
-                    "images\n\n!gpt [PROMPT]\tPrompt GPTBot with PROMPT arg\n!img [PROMPT]\tPrompt GPTBot"
-                    "for image gen with PROMPT arg\n!gpt --help\t  Print out GPTBot commands")
-                    
-                else:
-                    print(messageContent)
-                    
-                    promptInput = messageContent[4:]
-                    response = openai.Completion.create(
-                    model="text-davinci-003",
-                    prompt=promptInput,
-                    max_tokens=512,
-                    temperature=0.5    
-                    )
-                    r = response["choices"][0]['text']
-                    print("ANSWER: " + r)
+                
+                match messageArgs[1]:
+                    case '--help':
+                        r = ("GPTBot is used to answer questions and generate "
+                        "images\n\n!gpt [PROMPT]\tPrompt GPTBot with PROMPT arg(-t option to adjust temperature)\n!img [PROMPT]\tPrompt GPTBot"
+                        "for image gen with PROMPT arg\n!gpt --help\t  Print out GPTBot commands")
+                    case '-t':
+                        promptInput = messageArgs[-1]
+                        response = openai.Completion.create(
+                        model="text-davinci-003",
+                        prompt=promptInput,
+                        max_tokens=1024,
+                        temperature=float(messageArgs[2])  
+                        )
+                        r = response["choices"][0]['text']    
+                    case _:
+                        
+                        promptInput = messageArgs[-1]
+                        response = openai.Completion.create(
+                        model="text-davinci-003",
+                        prompt=promptInput,
+                        max_tokens=1024,
+                        temperature=0.5    
+                        )
+                        r = response["choices"][0]['text']
                 await message.channel.send(f'```{r}```')
-            elif messageContent.startswith('!img'):
+            elif messageArgs[0] == '!img':
                 promptInput = messageContent[4:]
                 response = openai.Image.create(
                 prompt=promptInput,
@@ -44,6 +52,9 @@ class gptClient(discord.Client):
                 await message.channel.send(image_url)
         except openai.error.InvalidRequestError:
             await message.channel.send('The prompt you requested in not valid and may have been rejected by our safety system')
+        
+        except discord.errors.HTTPException:
+            await message.channel.send('The response is to long for discord to display')
             
 
 intents = discord.Intents.default()
