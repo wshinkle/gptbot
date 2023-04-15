@@ -40,7 +40,7 @@ class gptClient(discord.Client):
                         temperature=0.5    
                         )
                         r = response["choices"][0]['text']
-                await message.channel.send(f'```{r}```')
+                await message.reply(f'```{r}```')
             elif messageArgs[0] == '!img':
                 promptInput = messageContent[4:]
                 response = openai.Image.create(
@@ -49,12 +49,12 @@ class gptClient(discord.Client):
                 size="512x512"
                 )
                 image_url = response['data'][0]['url']
-                await message.channel.send(image_url)
+                await message.reply(image_url)
         except openai.error.InvalidRequestError:
-            await message.channel.send('The prompt you requested in not valid and may have been rejected by our safety system')
+            await message.reply('The prompt you requested in not valid and may have been rejected by our safety system')
         
         except discord.errors.HTTPException:
-            await message.channel.send('The response is to long for discord to display')
+            await message.reply('The response is to long for discord to display')
             
 
 intents = discord.Intents.default()
