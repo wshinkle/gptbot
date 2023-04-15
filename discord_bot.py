@@ -27,7 +27,7 @@ class gptClient(discord.Client):
                     response = openai.Completion.create(
                     model="text-davinci-003",
                     prompt=promptInput,
-                    max_tokens=64,
+                    max_tokens=512,
                     temperature=0.5    
                     )
                     r = response["choices"][0]['text']
